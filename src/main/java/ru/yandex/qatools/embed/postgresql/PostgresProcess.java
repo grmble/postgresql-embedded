@@ -142,10 +142,12 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
 
     @Override
     protected synchronized void stopInternal() {
-        if (!stopped && isProcessRunning()) {
+        if (!stopped) {
             stopped = true;
             LOGGER.info("trying to stop postgresql");
-            if (!sendStopToPostgresqlInstance() && !sendTermToProcess() && waitUntilProcessHasStopped(2000)) {
+            sendStopToPostgresqlInstance();
+
+            if (isProcessRunning() && !sendTermToProcess() && waitUntilProcessHasStopped(2000)) {
                 LOGGER.warn("could not stop postgresql with pg_ctl/SIGTERM, trying to kill it...");
                 if (!sendKillToProcess() && !tryKillToProcess() && waitUntilProcessHasStopped(3000)) {
                     LOGGER.warn("could not kill postgresql within 4s!");
